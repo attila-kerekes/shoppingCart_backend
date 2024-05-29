@@ -1,7 +1,8 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import customerRoutes from './routes/customers';
+import productRoutes from './routes/productRoutes';
+import errorHandler from './middlewares/errorHandler';
 
 dotenv.config();
 
@@ -10,16 +11,18 @@ const { MONGO_URL, PORT } = process.env;
 mongoose.connect(MONGO_URL as string)
   .then(() => {
     const app = express();
+
+    // Serve static files from the public directory
+    app.use('/images', express.static('public/images'));
+    
+    // Middleware to parse JSON
     app.use(express.json());
 
-    // Use customer routes
-    app.use('/api/customers', customerRoutes);
+    // Use product routes
+    app.use('/api/products', productRoutes);
 
     // Error handling middleware
-    app.use((err, req, res, next) => {
-      console.error(err.stack);
-      res.status(500).send({ message: err.message });
-    });
+    app.use(errorHandler);
 
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);

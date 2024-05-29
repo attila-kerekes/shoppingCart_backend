@@ -3,7 +3,9 @@ import { registerCustomer, getAllCustomers } from '../controllers/customerContro
 
 const router = Router();
 
-router.post('/', registerCustomer);
-router.get('/', getAllCustomers);
+router
+  .route('/')
+    .get(getAllCustomers)
+    .post(registerCustomer);
 
 export default router;
