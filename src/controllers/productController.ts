@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import * as productService from '../services/productService';
+import { IProduct } from '../interfaces/product';
 
 export const getAllProducts = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -24,7 +25,11 @@ export const getProductById = async (req: Request, res: Response, next: NextFunc
 
 export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const product = await productService.createProduct(req.body);
+    const productData: IProduct = req.body;
+    if(req.file) {
+      productData.imagePath = `/images/${req.file.filename}`;
+    }
+    const product = await productService.createProduct(productData);
     res.status(201).send(product);
   } catch (err) {
     next(err);
@@ -33,7 +38,11 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
 
 export const updateProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const product = await productService.updateProduct(req.params.id, req.body);
+    const productData: Partial<IProduct> = req.body;
+    if (req.file) {
+      productData.imagePath = `/images/${req.file.filename}`;
+    }
+    const product = await productService.updateProduct(req.params.id, productData);
     if (!product) {
       return res.status(404).send({ message: 'Product not found' });
     }
@@ -54,4 +63,3 @@ export const deleteProduct = async (req: Request, res: Response, next: NextFunct
     next(err);
   }
 };
-
