@@ -13,7 +13,7 @@ mongoose.connect(MONGO_URL as string)
     const app = express();
 
     // Serve static files from the public directory
-    app.use('/images', express.static('public/images'));
+    app.use('/images', express.static('src/public/images'));
     
     // Middleware to parse JSON
     app.use(express.json());
