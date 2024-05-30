@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import productRoutes from './routes/productRoutes';
 import errorHandler from './middlewares/errorHandler';
+import path from 'path';
 
 dotenv.config();
 
@@ -13,7 +14,7 @@ mongoose.connect(MONGO_URL as string)
     const app = express();
 
     // Serve static files from the public directory
-    app.use('/images', express.static('src/public/images'));
+    app.use('/images', express.static(path.join(__dirname, 'public/images')));
     
     // Middleware to parse JSON
     app.use(express.json());
