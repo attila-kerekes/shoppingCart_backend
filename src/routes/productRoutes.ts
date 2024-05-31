@@ -13,7 +13,7 @@ const router = Router();
 router
   .route('/')
     .get(getAllProducts)
-    .post(uploadFileMw.single('image'), createProduct);;
+    .post(uploadFileMw.single('image'), createProduct);
 
 router
   .route('/:id')
