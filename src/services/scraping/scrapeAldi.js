@@ -2,6 +2,12 @@ const puppeteer = require("puppeteer");
 const fs = require("fs");
 const path = require("path");
 
+function delay(time) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, time);
+  });
+}
+
 
 // Scrape categories
 async function scrapeCategories(url) {
@@ -9,29 +15,50 @@ async function scrapeCategories(url) {
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: 'domcontentloaded' });
 
+  await delay(10000);
+
   try {
-    await page.waitForSelector('.category-page-sidebar-categories', { timeout: 30000 });
+    await page.waitForSelector('#accordionExample', { timeout: 30000 });
+    console.log('Accordion example selector found');
 
     const categories = await page.evaluate(() => {
       const categoriesObj = {};
+      const mainCategoryElements = document.querySelectorAll('ul#accordionExample > li.category-page-sidebar-category');
 
-      const mainCategoryElements = document.querySelectorAll('.category-page-sidebar-category');
-
+      console.log('Found main categories:', mainCategoryElements.length);
+      
       mainCategoryElements.forEach((mainCategoryEl) => {
-        const mainCategoryName = mainCategoryEl.querySelector('.category-page-sidebar-category-link').innerText.trim();
+        const mainCategoryLink = mainCategoryEl.querySelector('a.category-page-sidebar-category-link');
+        if (!mainCategoryLink) {
+          console.error('Main category link not found');
+          return;
+        }
+
+        const mainCategoryName = mainCategoryLink.innerText.trim();
+        console.log('Main category name:', mainCategoryName);
         categoriesObj[mainCategoryName] = [];
 
-        const subCategoryElements = mainCategoryEl.querySelectorAll('.category-page-sidebar-subcategory');
+        const subCategoryElements = mainCategoryEl.querySelectorAll('ul.accordion-body > li.category-page-sidebar-subcategory');
+        console.log('Found subcategories:', subCategoryElements.length, 'for main category:', mainCategoryName);
+
         subCategoryElements.forEach((subCategoryEl) => {
-          const subCategoryName = subCategoryEl.querySelector('.category-page-sidebar-subcategory-link').innerText.trim();
+          const subCategoryLink = subCategoryEl.querySelector('a.category-page-sidebar-subcategory-link');
+          if (!subCategoryLink) {
+            console.error('Subcategory link not found');
+            return;
+          }
+
+          const subCategoryName = subCategoryLink.innerText.trim();
+          console.log('Subcategory name:', subCategoryName);
           categoriesObj[mainCategoryName].push(subCategoryName);
         });
       });
 
+      console.log('Categories object constructed:', categoriesObj);
       return categoriesObj;
     });
 
-    console.log(categories);
+    console.log('Categories:', categories);
 
   } catch (error) {
     console.error('Error scraping categories:', error);
@@ -40,30 +67,25 @@ async function scrapeCategories(url) {
   }
 }
 
-scrapeCategories('https://shop.aldi.hu/kezdooldal');
+//scrapeCategories('https://shop.aldi.hu/kezdooldal');
 
-
-
-function delay(time) {
-  return new Promise(function(resolve) { 
-    setTimeout(resolve, time);
-  });
-}
 
 // Scrape products
 async function scrapeProducts(url, mainCategory, subCategory) {
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
 
+  await delay(10000);
+
   try {
     await page.goto(url, { waitUntil: 'domcontentloaded' });
 
-    // Wait for the main categories to be loaded and displayed
-    await page.waitForSelector('ul.category-page-sidebar-categories', { timeout: 30000 });
+    await page.waitForSelector('#accordionExample', { timeout: 30000 });
+    console.log('Accordion example selector found');
 
     // Click on the main category
     await page.evaluate((mainCategory) => {
-      const mainCategoryElement = Array.from(document.querySelectorAll('ul.category-page-sidebar-categories > li.category-page-sidebar-category a.category-page-sidebar-category-link'))
+      const mainCategoryElement = Array.from(document.querySelectorAll('ul#accordionExample > li.category-page-sidebar-category a.category-page-sidebar-category-link'))
         .find(el => el.innerText.trim() === mainCategory);
       if (mainCategoryElement) mainCategoryElement.click();
     }, mainCategory);
@@ -136,4 +158,4 @@ async function scrapeProducts(url, mainCategory, subCategory) {
   }
 }
 
-//scrapeProducts('https://shop.aldi.hu/kezdooldal', 'Tejtermék, tojás', 'Tojás')
+scrapeProducts('https://shop.aldi.hu/kezdooldal', 'Tejtermék, tojás', 'Tej')
