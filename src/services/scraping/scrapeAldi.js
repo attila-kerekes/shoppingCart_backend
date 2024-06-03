@@ -2,118 +2,86 @@ const puppeteer = require("puppeteer");
 const fs = require("fs");
 const path = require("path");
 
-/*
-async function scrapeHTML(url) {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  await page.goto(url, { waitUntil: 'domcontentloaded' });
-
-  // Get the entire HTML content
-  const html = await page.content();
-
-  // Save the HTML content to a file
-  const filePath = path.join(__dirname, "page.html");
-  fs.writeFileSync(filePath, html);
-
-  console.log(`HTML content saved to ${filePath}`);
-  await browser.close();
-}
-
-scrapeHTML('https://shop.aldi.hu/kezdooldal');
-*/
-
-/*
-async function scrapeCategories(url) {
-  const browser = await puppeteer.launch({ headless: true });
-  const page = await browser.newPage();
-  await page.goto(url, { waitUntil: 'domcontentloaded' });
-
-  // Wait for the categories to be loaded and displayed
-  await page.waitForSelector('ul#accordionExample');
-
-  // Extract the text of the categories
-  const categories = await page.evaluate(() => {
-    // Select all category elements within the ul with id "accordionExample"
-    const categoryElements = document.querySelectorAll('ul#accordionExample li');
-
-    // Extract the text content of each category element
-    const categoryTexts = Array.from(categoryElements).map(el => {
-      // Ensure the element is an HTMLElement to access innerText
-      return el instanceof HTMLElement ? el.innerText.trim() : '';
-    });
-
-    return categoryTexts;
-  });
-
-  console.log(categories);
-
-  await browser.close();
-}
-
-scrapeCategories('https://shop.aldi.hu/kezdooldal');
-*/
-
 function delay(time) {
-  return new Promise(function(resolve) { 
+  return new Promise(function (resolve) {
     setTimeout(resolve, time);
   });
 }
 
 
+// Scrape categories
 async function scrapeCategories(url) {
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: 'domcontentloaded' });
 
-  // Wait for the categories to be loaded and displayed
-  await page.waitForSelector('ul#accordionExample', { timeout: 20000 });
+  await delay(10000);
 
-  // Extract the text of the categories
-  const categories = await page.evaluate(() => {
-    const categoriesObj = {};
+  try {
+    await page.waitForSelector('#accordionExample', { timeout: 30000 });
+    console.log('Accordion example selector found');
 
-    // Select all main category elements
-    const mainCategoryElements = document.querySelectorAll('ul#accordionExample > li.category-page-sidebar-category');
+    const categories = await page.evaluate(() => {
+      const categoriesObj = {};
+      const mainCategoryElements = document.querySelectorAll('ul#accordionExample > li.category-page-sidebar-category');
 
-    mainCategoryElements.forEach((mainCategoryEl) => {
-      // Get the main category name
-      const mainCategoryName = mainCategoryEl.querySelector('a.category-page-sidebar-category-link').innerText.trim();
+      console.log('Found main categories:', mainCategoryElements.length);
+      
+      mainCategoryElements.forEach((mainCategoryEl) => {
+        const mainCategoryLink = mainCategoryEl.querySelector('a.category-page-sidebar-category-link');
+        if (!mainCategoryLink) {
+          console.error('Main category link not found');
+          return;
+        }
 
-      // Initialize the main category in the object
-      categoriesObj[mainCategoryName] = [];
+        const mainCategoryName = mainCategoryLink.innerText.trim();
+        console.log('Main category name:', mainCategoryName);
+        categoriesObj[mainCategoryName] = [];
 
-      // Get subcategory elements within this main category
-      const subCategoryElements = mainCategoryEl.querySelectorAll('ul.accordion-body > li.category-page-sidebar-subcategory');
+        const subCategoryElements = mainCategoryEl.querySelectorAll('ul.accordion-body > li.category-page-sidebar-subcategory');
+        console.log('Found subcategories:', subCategoryElements.length, 'for main category:', mainCategoryName);
 
-      subCategoryElements.forEach((subCategoryEl) => {
-        // Get the subcategory name
-        const subCategoryName = subCategoryEl.querySelector('a.category-page-sidebar-subcategory-link').innerText.trim();
+        subCategoryElements.forEach((subCategoryEl) => {
+          const subCategoryLink = subCategoryEl.querySelector('a.category-page-sidebar-subcategory-link');
+          if (!subCategoryLink) {
+            console.error('Subcategory link not found');
+            return;
+          }
 
-        // Add subcategory name to the main category
-        categoriesObj[mainCategoryName].push(subCategoryName);
+          const subCategoryName = subCategoryLink.innerText.trim();
+          console.log('Subcategory name:', subCategoryName);
+          categoriesObj[mainCategoryName].push(subCategoryName);
+        });
       });
+
+      console.log('Categories object constructed:', categoriesObj);
+      return categoriesObj;
     });
 
-    return categoriesObj;
-  });
+    console.log('Categories:', categories);
 
-  console.log(categories);
-
-  await browser.close();
+  } catch (error) {
+    console.error('Error scraping categories:', error);
+  } finally {
+    await browser.close();
+  }
 }
 
-scrapeCategories('https://shop.aldi.hu/kezdooldal');
+//scrapeCategories('https://shop.aldi.hu/kezdooldal');
 
 
+// Scrape products
 async function scrapeProducts(url, mainCategory, subCategory) {
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
 
+  await delay(10000);
+
   try {
     await page.goto(url, { waitUntil: 'domcontentloaded' });
 
-    // Wait for the main categories to be loaded and displayed
-    await page.waitForSelector('ul#accordionExample', { timeout: 15000 });
+    await page.waitForSelector('#accordionExample', { timeout: 30000 });
+    console.log('Accordion example selector found');
 
     // Click on the main category
     await page.evaluate((mainCategory) => {
@@ -123,7 +91,7 @@ async function scrapeProducts(url, mainCategory, subCategory) {
     }, mainCategory);
 
     // Wait for subcategories to be loaded and displayed
-    await page.waitForSelector('ul.accordion-body', { timeout: 15000 });
+    await page.waitForSelector('ul.accordion-body', { timeout: 30000 });
 
     // Click on the subcategory
     await page.evaluate((subCategory) => {
@@ -160,10 +128,10 @@ async function scrapeProducts(url, mainCategory, subCategory) {
     while (true) {
       previousHeight = await page.evaluate('document.body.scrollHeight');
       await autoScroll(page);
-      await delay(2000); // Wait for 2 seconds to load new products
+      await delay(2000);
       const newHeight = await page.evaluate('document.body.scrollHeight');
       if (newHeight === previousHeight) {
-        break; // Exit the loop if no new products are loaded
+        break;
       }
     }
 
