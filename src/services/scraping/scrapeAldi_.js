@@ -8,7 +8,7 @@ function delay(time) {
 
 
 // Scrape categories
-async function scrapeCategories(url) {
+export async function scrapeCategories(url) {
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: 'domcontentloaded' });
@@ -69,7 +69,7 @@ async function scrapeCategories(url) {
 
 
 // Scrape products
-async function scrapeProducts(url, mainCategory, subCategory) {
+export async function scrapeProducts(url, mainCategory, subCategory) {
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
 
@@ -157,8 +157,3 @@ async function scrapeProducts(url, mainCategory, subCategory) {
 }
 
 scrapeProducts('https://shop.aldi.hu/kezdooldal', 'Tejtermék, tojás', 'Tej')
-
-module.exports = {
-  scrapeCategories,
-  scrapeProducts
-};

@@ -1,4 +1,4 @@
-interface ISubcategory {
-    name: string;
-    products: string[];
-  }
+export interface ISubcategory {
+  name: string;
+  products: string[];
+}
