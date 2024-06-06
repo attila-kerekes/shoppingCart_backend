@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import * as customerService from '../services/customerService';
+import * as customerService from '../services/customerService.js';
 
 export const registerCustomer = async (req: Request, res: Response, next: NextFunction) => {
   try {

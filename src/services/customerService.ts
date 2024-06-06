@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import * as customerRepository from '../repositories/customerRepository';
+import * as customerRepository from '../repositories/customerRepository.js';
 
 export const registerCustomer = async (customerData: any) => {
   const salt = await bcrypt.genSalt();

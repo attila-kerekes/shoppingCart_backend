@@ -1,9 +1,10 @@
 import express, { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import productRoutes from './routes/productRoutes';
-import errorHandler from './middlewares/errorHandler';
+import productRoutes from './routes/productRoutes.js';
+import errorHandler from './middlewares/errorHandler.js';
 import path from 'path';
+import aldiProductRoutes from './routes/aldiProductRoutes.js';
 
 dotenv.config();
 
@@ -21,6 +22,9 @@ mongoose.connect(MONGO_URL as string)
 
     // Use product routes
     app.use('/api/products', productRoutes);
+
+    // Use aldi product routes
+    app.use('/api/aldi', aldiProductRoutes);
 
     // Error handling middleware
     app.use(errorHandler);

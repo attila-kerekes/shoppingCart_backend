@@ -1,22 +1,22 @@
-import * as productRepository from '../repositories/productRepository.js';
+import * as aldiProductRepository from '../repositories/aldiProductRepository.js';
 import { IProduct } from '../interfaces/product.js';
 
 export const getAllProducts = (): Promise<IProduct[]> => {
-  return productRepository.findAllProducts();
+  return aldiProductRepository.findAllProducts();
 };
 
 export const getProductById = (id: string): Promise<IProduct | null> => {
-  return productRepository.findProductById(id);
+  return aldiProductRepository.findProductById(id);
 };
 
 export const createProduct = (productData: IProduct): Promise<IProduct> => {
-  return productRepository.createProduct(productData);
+  return aldiProductRepository.createProduct(productData);
 };
 
 export const updateProduct = (id: string, productData: Partial<IProduct>): Promise<IProduct | null> => {
-  return productRepository.updateProduct(id, productData);
+  return aldiProductRepository.updateProduct(id, productData);
 };
 
 export const deleteProduct = (id: string): Promise<IProduct | null> => {
-  return productRepository.deleteProduct(id);
+  return aldiProductRepository.deleteProduct(id);
 };

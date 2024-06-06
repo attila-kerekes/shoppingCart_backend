@@ -1,6 +1,4 @@
-const puppeteer = require("puppeteer");
-const fs = require("fs");
-const path = require("path");
+import puppeteer from 'puppeteer';
 
 function delay(time) {
   return new Promise(function (resolve) {
@@ -15,7 +13,7 @@ async function scrapeCategories(url) {
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: 'domcontentloaded' });
 
-  await delay(10000);
+  await delay(20000);
 
   try {
     await page.waitForSelector('#accordionExample', { timeout: 30000 });
@@ -75,7 +73,7 @@ async function scrapeProducts(url, mainCategory, subCategory) {
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
 
-  await delay(10000);
+  await delay(20000);
 
   try {
     await page.goto(url, { waitUntil: 'domcontentloaded' });
@@ -159,3 +157,8 @@ async function scrapeProducts(url, mainCategory, subCategory) {
 }
 
 scrapeProducts('https://shop.aldi.hu/kezdooldal', 'Tejtermék, tojás', 'Tej')
+
+module.exports = {
+  scrapeCategories,
+  scrapeProducts
+};
