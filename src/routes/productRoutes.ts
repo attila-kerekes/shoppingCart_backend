@@ -5,8 +5,8 @@ import {
   createProduct,
   updateProduct,
   deleteProduct
-} from '../controllers/productController';
-import uploadFileMw from '../middlewares/uploadFileMw';
+} from '../controllers/productController.js';
+import uploadFileMw from '../middlewares/uploadFileMw.js';
 
 const router = Router();
 

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import * as productService from '../services/productService';
-import { IProduct } from '../interfaces/product';
+import * as productService from '../services/productService.js';
+import { IProduct } from '../interfaces/product.js';
 
 export const getAllProducts = async (req: Request, res: Response, next: NextFunction) => {
   try {

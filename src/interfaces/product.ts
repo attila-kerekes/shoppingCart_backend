@@ -1,6 +1,5 @@
 export interface IProduct {
-    name: string;
-    price: number;
-    imagePath: string;
-  }
-  
+  name: string;
+  price: number;
+  imagePath: string;
+}
